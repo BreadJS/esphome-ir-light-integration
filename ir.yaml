@@ -1,0 +1,393 @@
+esphome:
+  name: ir
+  friendly_name: ir
+
+  # On boot the code 
+  on_boot:
+    - remote_transmitter.transmit_nec:
+        transmitter_id: left_transmitter
+        address: 0xFF00
+        command: 0xF807
+    - remote_transmitter.transmit_nec:
+        transmitter_id: right_transmitter
+        address: 0xFF00
+        command: 0xF807
+    - remote_transmitter.transmit_nec:
+        transmitter_id: left_transmitter
+        address: 0xFF00
+        command: 0xFC03
+    - remote_transmitter.transmit_nec:
+        transmitter_id: right_transmitter
+        address: 0xFF00
+        command: 0xFC03
+    - remote_transmitter.transmit_nec:
+        transmitter_id: left_transmitter
+        address: 0xFF00
+        command: 0xF906
+    - remote_transmitter.transmit_nec:
+        transmitter_id: right_transmitter
+        address: 0xFF00
+        command: 0xF906
+
+esp8266:
+  board: esp01_1m
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "ENCRYPTION_KEY"
+
+ota:
+  password: "OTA_PASSWORD"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "IR Fallback Hotspot"
+    password: "FALLBACK_PASSWORD"
+
+captive_portal:
+    
+remote_transmitter:
+  - id: left_transmitter
+    pin: GPIO14
+    carrier_duty_percent: 50%
+  - id: right_transmitter
+    pin: GPIO12
+    carrier_duty_percent: 50%
+
+switch:
+  - platform: template
+    name: "Nachtlampje Left"
+    id: nachtlampje_left
+    icon: "mdi:lightbulb-night"
+    turn_on_action:
+      - remote_transmitter.transmit_nec:
+          transmitter_id: left_transmitter
+          address: 0xFF00
+          command: 0xF807
+      - switch.template.publish:
+          id: nachtlampje_left
+          state: ON
+    turn_off_action:
+      - remote_transmitter.transmit_nec:
+          transmitter_id: left_transmitter
+          address: 0xFF00
+          command: 0xF906
+      - switch.template.publish:
+          id: nachtlampje_left
+          state: OFF
+  - platform: template
+    name: "Nachtlampje Right"
+    id: nachtlampje_right
+    icon: "mdi:lightbulb-night"
+    turn_on_action:
+      - remote_transmitter.transmit_nec:
+          transmitter_id: right_transmitter
+          address: 0xFF00
+          command: 0xF807
+      - switch.template.publish:
+          id: nachtlampje_right
+          state: ON
+    turn_off_action:
+      - remote_transmitter.transmit_nec:
+          transmitter_id: right_transmitter
+          address: 0xFF00
+          command: 0xF906
+      - switch.template.publish:
+          id: nachtlampje_right
+          state: OFF
+
+select:
+  - platform: template
+    name: "Nachtlampje Left Color"
+    id: nachtlampje_left_color
+    optimistic: true
+    options:
+      - "White"
+      - "Red"
+      - "Green"
+      - "Light Green"
+      - "Blue"
+      - "Light Blue"
+      - "Purple"
+      - "Orange"
+      - "Cyan"
+      - "Pink"
+      - "Pink/Purple ish"
+    initial_option: White
+    on_value:
+      - if:
+          condition:
+            lambda: |-
+              auto selected_option = id(nachtlampje_left_color).state;
+              return selected_option == "White";
+          then:
+            - remote_transmitter.transmit_nec:
+                transmitter_id: left_transmitter
+                address: 0xFF00
+                command: 0xFC03
+      - if:
+          condition:
+            lambda: |-
+              auto selected_option = id(nachtlampje_left_color).state;
+              return selected_option == "Red";
+          then:
+            - remote_transmitter.transmit_nec:
+                transmitter_id: left_transmitter
+                address: 0xFF00
+                command: 0xF708
+      - if:
+          condition:
+            lambda: |-
+              auto selected_option = id(nachtlampje_left_color).state;
+              return selected_option == "Green";
+          then:
+            - remote_transmitter.transmit_nec:
+                transmitter_id: left_transmitter
+                address: 0xFF00
+                command: 0xF609
+      - if:
+          condition:
+            lambda: |-
+              auto selected_option = id(nachtlampje_left_color).state;
+              return selected_option == "Light Green";
+          then:
+            - remote_transmitter.transmit_nec:
+                transmitter_id: left_transmitter
+                address: 0xFF00
+                command: 0xF20D
+      - if:
+          condition:
+            lambda: |-
+              auto selected_option = id(nachtlampje_left_color).state;
+              return selected_option == "Blue";
+          then:
+            - remote_transmitter.transmit_nec:
+                transmitter_id: left_transmitter
+                address: 0xFF00
+                command: 0xF50A
+      - if:
+          condition:
+            lambda: |-
+              auto selected_option = id(nachtlampje_left_color).state;
+              return selected_option == "Light Blue";
+          then:
+            - remote_transmitter.transmit_nec:
+                transmitter_id: left_transmitter
+                address: 0xFF00
+                command: 0xEA15
+      - if:
+          condition:
+            lambda: |-
+              auto selected_option = id(nachtlampje_left_color).state;
+              return selected_option == "Purple";
+          then:
+            - remote_transmitter.transmit_nec:
+                transmitter_id: left_transmitter
+                address: 0xFF00
+                command: 0xF10E
+      - if:
+          condition:
+            lambda: |-
+              auto selected_option = id(nachtlampje_left_color).state;
+              return selected_option == "Orange";
+          then:
+            - remote_transmitter.transmit_nec:
+                transmitter_id: left_transmitter
+                address: 0xFF00
+                command: 0xE718
+      - if:
+          condition:
+            lambda: |-
+              auto selected_option = id(nachtlampje_left_color).state;
+              return selected_option == "Cyan";
+          then:
+            - remote_transmitter.transmit_nec:
+                transmitter_id: left_transmitter
+                address: 0xFF00
+                command: 0xEE11
+      - if:
+          condition:
+            lambda: |-
+              auto selected_option = id(nachtlampje_left_color).state;
+              return selected_option == "Pink";
+          then:
+            - remote_transmitter.transmit_nec:
+                transmitter_id: left_transmitter
+                address: 0xFF00
+                command: 0xE51A
+      - if:
+          condition:
+            lambda: |-
+              auto selected_option = id(nachtlampje_left_color).state;
+              return selected_option == "Pink/Purple ish";
+          then:
+            - remote_transmitter.transmit_nec:
+                transmitter_id: left_transmitter
+                address: 0xFF00
+                command: 0xED12
+  - platform: template
+    name: "Nachtlampje Right Color"
+    id: nachtlampje_right_color
+    optimistic: true
+    options:
+      - "White"
+      - "Red"
+      - "Green"
+      - "Light Green"
+      - "Blue"
+      - "Light Blue"
+      - "Purple"
+      - "Orange"
+      - "Cyan"
+      - "Pink"
+      - "Pink/Purple ish"
+    initial_option: White
+    on_value:
+      - if:
+          condition:
+            lambda: |-
+              auto selected_option = id(nachtlampje_right_color).state;
+              return selected_option == "White";
+          then:
+            - remote_transmitter.transmit_nec:
+                transmitter_id: right_transmitter
+                address: 0xFF00
+                command: 0xFC03
+      - if:
+          condition:
+            lambda: |-
+              auto selected_option = id(nachtlampje_right_color).state;
+              return selected_option == "Red";
+          then:
+            - remote_transmitter.transmit_nec:
+                transmitter_id: right_transmitter
+                address: 0xFF00
+                command: 0xF708
+      - if:
+          condition:
+            lambda: |-
+              auto selected_option = id(nachtlampje_right_color).state;
+              return selected_option == "Green";
+          then:
+            - remote_transmitter.transmit_nec:
+                transmitter_id: right_transmitter
+                address: 0xFF00
+                command: 0xF609
+      - if:
+          condition:
+            lambda: |-
+              auto selected_option = id(nachtlampje_right_color).state;
+              return selected_option == "Light Green";
+          then:
+            - remote_transmitter.transmit_nec:
+                transmitter_id: right_transmitter
+                address: 0xFF00
+                command: 0xF20D
+      - if:
+          condition:
+            lambda: |-
+              auto selected_option = id(nachtlampje_right_color).state;
+              return selected_option == "Blue";
+          then:
+            - remote_transmitter.transmit_nec:
+                transmitter_id: right_transmitter
+                address: 0xFF00
+                command: 0xF50A
+      - if:
+          condition:
+            lambda: |-
+              auto selected_option = id(nachtlampje_right_color).state;
+              return selected_option == "Light Blue";
+          then:
+            - remote_transmitter.transmit_nec:
+                transmitter_id: right_transmitter
+                address: 0xFF00
+                command: 0xEA15
+      - if:
+          condition:
+            lambda: |-
+              auto selected_option = id(nachtlampje_right_color).state;
+              return selected_option == "Purple";
+          then:
+            - remote_transmitter.transmit_nec:
+                transmitter_id: right_transmitter
+                address: 0xFF00
+                command: 0xF10E
+      - if:
+          condition:
+            lambda: |-
+              auto selected_option = id(nachtlampje_right_color).state;
+              return selected_option == "Orange";
+          then:
+            - remote_transmitter.transmit_nec:
+                transmitter_id: right_transmitter
+                address: 0xFF00
+                command: 0xE718
+      - if:
+          condition:
+            lambda: |-
+              auto selected_option = id(nachtlampje_right_color).state;
+              return selected_option == "Cyan";
+          then:
+            - remote_transmitter.transmit_nec:
+                transmitter_id: right_transmitter
+                address: 0xFF00
+                command: 0xEE11
+      - if:
+          condition:
+            lambda: |-
+              auto selected_option = id(nachtlampje_right_color).state;
+              return selected_option == "Pink";
+          then:
+            - remote_transmitter.transmit_nec:
+                transmitter_id: right_transmitter
+                address: 0xFF00
+                command: 0xE51A
+      - if:
+          condition:
+            lambda: |-
+              auto selected_option = id(nachtlampje_right_color).state;
+              return selected_option == "Pink/Purple ish";
+          then:
+            - remote_transmitter.transmit_nec:
+                transmitter_id: right_transmitter
+                address: 0xFF00
+                command: 0xED12
+
+button:
+  - platform: template
+    name: "Nachtlampje Left Brightness Up"
+    on_press:
+      - remote_transmitter.transmit_nec:
+          transmitter_id: left_transmitter
+          address: 0xFF00
+          command: 0xFF00
+  - platform: template
+    name: "Nachtlampje Left Brightness Down"
+    on_press:
+      - remote_transmitter.transmit_nec:
+          transmitter_id: left_transmitter
+          address: 0xFF00
+          command: 0xFD02
+  - platform: template
+    name: "Nachtlampje Right Brightness Up"
+    on_press:
+      - remote_transmitter.transmit_nec:
+          transmitter_id: right_transmitter
+          address: 0xFF00
+          command: 0xFF00
+  - platform: template
+    name: "Nachtlampje Right Brightness Down"
+    on_press:
+      - remote_transmitter.transmit_nec:
+          transmitter_id: right_transmitter
+          address: 0xFF00
+          command: 0xFD02
